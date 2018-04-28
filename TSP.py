@@ -1,11 +1,8 @@
 import random
 
 population = []
-routes_length = []
-overwrite_flag = 0
+routes_length = [0]*20
 population_size = 20  # max 120 combinations
-mut_prob = 0.4
-n_generations = 200
 
 
 cities = ['A', 'B', 'C', 'D', 'E']
@@ -26,18 +23,11 @@ def create_route():
 
 
 def calc_route_length():
-    if overwrite_flag == 0:
-        for i in range(population_size):
-            route_l = 0
-            for j in range(1, 5):
-                route_l = route_l + calc_distance(population[i][j - 1], population[i][j])
-            routes_length.append(route_l)
-    else:
-        for i in range(population_size):
-            route_l = 0
-            for j in range(1, 5):
-                route_l = route_l + calc_distance(population[i][j - 1], population[i][j])
-            routes_length[i] = route_l
+    for i in range(population_size):
+        route_l = 0
+        for j in range(1, 5):
+            route_l = route_l + calc_distance(population[i][j - 1], population[i][j])
+        routes_length[i] = route_l
 
 
 def create_population():
@@ -53,15 +43,69 @@ def swap_mutation():
     print(population[1])
 
 
+def PartialyMatchedCrossover(ind1, ind2):
+    size = 5
+    p1, p2 = [0] * size, [0] * size
+
+    # Converts characters of a route to numbers
+    for i in range(size):
+        ind1[i] = ord(ind1[i]) - 65
+        ind2[i] = ord(ind2[i]) - 65
+    # Initialize the position of each indices in the individuals
+    for i in range(size):
+        p1[ind1[i]] = i
+        p2[ind2[i]] = i
+    # Choose crossover points
+    cxpoint1 = random.randint(0, size)
+    cxpoint2 = random.randint(0, size - 1)
+    if cxpoint2 >= cxpoint1:
+        cxpoint2 += 1
+    else:  # Swap the two cx points
+        cxpoint1, cxpoint2 = cxpoint2, cxpoint1
+
+# Apply crossover between cx points
+    for i in range(cxpoint1, cxpoint2):
+    # Keep track of the selected values
+        temp1 = ind1[i]
+        temp2 = ind2[i]
+    # Swap the matched value
+        ind1[i], ind1[p1[temp2]] = temp2, temp1
+        ind2[i], ind2[p2[temp1]] = temp1, temp2
+    # Position bookkeeping
+        p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
+        p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
+    # Restores individuals
+    for i in range(size):
+        ind1[i] = chr(ind1[i]+65)
+        ind2[i] = chr(ind2[i]+65)
+    return ind1, ind2
+
+
+#def selection_for_crossover():
+
+
+
 create_population()
 calc_route_length()
 print(population)
 print(routes_length)
 
-swap_mutation()
-overwrite_flag = 1
+PartialyMatchedCrossover(population[0], population[1])
 calc_route_length()
+print(population)
 print(routes_length)
+
+swap_mutation()
+calc_route_length()
+print(population)
+print(routes_length)
+
+
+routes_length, population = (list(i) for i in zip(*sorted(zip(routes_length, population))))
+print(population)
+print(routes_length)
+
+
 
 
 

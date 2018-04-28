@@ -2,7 +2,9 @@ import random
 
 population = []
 routes_length = [0]*20
+fitness = [0]*20
 population_size = 20  # max 120 combinations
+mutate_prop = 0.1
 
 
 cities = ['A', 'B', 'C', 'D', 'E']
@@ -28,6 +30,7 @@ def calc_route_length():
         for j in range(1, 5):
             route_l = route_l + calc_distance(population[i][j - 1], population[i][j])
         routes_length[i] = route_l
+        fitness[i] = 1 / routes_length[i]
 
 
 def create_population():
@@ -76,13 +79,23 @@ def PartialyMatchedCrossover(ind1, ind2):
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
     # Restores individuals
     for i in range(size):
-        ind1[i] = chr(ind1[i]+65)
-        ind2[i] = chr(ind2[i]+65)
+        ind1[i] = chr(ind1[i] + 65)
+        ind2[i] = chr(ind2[i] + 65)
     return ind1, ind2
 
 
-#def selection_for_crossover():
-
+def roulette_wheel_selection():
+    s = 0
+    partial_s = 0
+    ind = 0
+    for i in range(population_size):
+        s = s + fitness[i]
+    rand = random.uniform(0, s)
+    for i in range(population_size):
+        if partial_s < rand:
+            partial_s = partial_s + fitness[i]
+            ind = i
+    print(ind)
 
 
 create_population()
@@ -104,6 +117,8 @@ print(routes_length)
 routes_length, population = (list(i) for i in zip(*sorted(zip(routes_length, population))))
 print(population)
 print(routes_length)
+print(fitness)
+roulette_wheel_selection()
 
 
 

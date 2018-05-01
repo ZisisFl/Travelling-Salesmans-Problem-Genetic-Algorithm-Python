@@ -1,11 +1,12 @@
 import random
 
 population = []
-routes_length = [0]*20
-fitness = [0]*20
-population_size = 20  # max 120 combinations
+population_size = 10  # max 120 combinations
 mutate_prop = 0.1
 n_generations = 30
+routes_length = [0]*population_size
+fitness = [0]*population_size
+taken = []
 
 
 cities = ['A', 'B', 'C', 'D', 'E']
@@ -44,13 +45,12 @@ def swap_mutation(ind):
     temp = population[ind][picks[0]]
     population[ind][picks[0]] = population[ind][picks[1]]
     population[ind][picks[1]] = temp
-    #print("Mutated path: ", population[ind])
+    print("Mutated path: ", population[ind])
 
 
 def partially_matched_crossover(ind1, ind2):
     size = len(cities)
     p1, p2 = [0] * size, [0] * size
-
     # Converts characters of a route to numbers
     for k in range(size):
         ind1[k] = ord(ind1[k]) - 65
@@ -97,15 +97,15 @@ def roulette_wheel_selection():
         if partial_s < rand:
             partial_s = partial_s + fitness[m]
             ind = ind + 1
-    if ind == 20:
-        ind = 19
+    if ind == population_size:
+        ind = population_size - 1
     return ind
 
 
 def find_fittest():
     key = 1000
     fittest = 0
-    for i in range(20):
+    for i in range(population_size):
         if routes_length[i] < key:
             key = routes_length[i]
             fittest = i
@@ -120,12 +120,27 @@ create_population()
 print("Population initialization:", "\n", population)
 calc_route_length()
 print("Population's paths length:", "\n", routes_length)
-for i in range(10):
+
+for i in range(0, int(population_size/2), 2):
     parent1 = roulette_wheel_selection()
     parent2 = roulette_wheel_selection()
-    population[i], population[i+1] = partially_matched_crossover(population[parent1], population[parent2])#population[1], population[1] old
+    while True:
+        if parent1 in taken:
+            parent1 = roulette_wheel_selection()
+        elif parent2 in taken:
+            parent2 = roulette_wheel_selection()
+        else:
+            break
+    while True:
+        if parent1 == parent2:
+            parent2 = roulette_wheel_selection()
+        else:
+            break
+    taken.append(parent1)
+    taken.append(parent2)
+    population[i], population[i+1] = partially_matched_crossover(population[parent1], population[parent2])
     calc_route_length()
-for i in range(20):
+for i in range(population_size):
     rand = random.uniform(0, 1)
     if rand < mutate_prop:
         swap_mutation(i)
@@ -135,18 +150,7 @@ print(population)
 print(routes_length)
 
 #for j in range(n_generations):
-#    for i in range(10):
-#        parent1 = roulette_wheel_selection()
-#        print(parent1)
-#        parent2 = roulette_wheel_selection()
-#        print(parent2)
-#        population[i], population[i + 1] = partially_matched_crossover(population[parent1], population[
-#            parent2])  # population[1], population[1] old
-#        calc_route_length()
-#    for i in range(20):
-#        rand = random.uniform(0, 1)
-#        if rand < mutate_prop:
-#            swap_mutation(i)
+
 
 
 

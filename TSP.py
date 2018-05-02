@@ -3,7 +3,7 @@ import random
 population = []
 population_size = 10  # max 120 combinations
 mutate_prop = 0.1
-n_generations = 30
+n_generations = 3
 routes_length = [0]*population_size
 fitness = [0]*population_size
 taken = []
@@ -121,36 +121,37 @@ print("Population initialization:", "\n", population)
 calc_route_length()
 print("Population's paths length:", "\n", routes_length)
 
-for i in range(0, int(population_size/2), 2):
-    parent1 = roulette_wheel_selection()
-    parent2 = roulette_wheel_selection()
-    while True:
-        if parent1 in taken:
-            parent1 = roulette_wheel_selection()
-        elif parent2 in taken:
-            parent2 = roulette_wheel_selection()
-        else:
-            break
-    while True:
-        if parent1 == parent2:
-            parent2 = roulette_wheel_selection()
-        else:
-            break
-    taken.append(parent1)
-    taken.append(parent2)
-    population[i], population[i+1] = partially_matched_crossover(population[parent1], population[parent2])
+
+for j in range(n_generations):
+    for i in range(0, population_size, 2):
+        parent1 = roulette_wheel_selection()
+        parent2 = roulette_wheel_selection()
+        while True:
+            if parent1 in taken:
+                parent1 = roulette_wheel_selection()
+            elif parent2 in taken:
+                parent2 = roulette_wheel_selection()
+            else:
+                break
+        while True:
+            if parent1 == parent2:
+                parent2 = roulette_wheel_selection()
+            else:
+                break
+        taken.append(parent1)
+        taken.append(parent2)
+        population[i], population[i + 1] = partially_matched_crossover(population[parent1], population[parent2])
+        calc_route_length()
+    for i in range(population_size):
+        rand = random.uniform(0, 1)
+        if rand < mutate_prop:
+            swap_mutation(i)
     calc_route_length()
-for i in range(population_size):
-    rand = random.uniform(0, 1)
-    if rand < mutate_prop:
-        swap_mutation(i)
-calc_route_length()
-print("Best route for generation: ", population[find_fittest()], "\n" "Route length: ", routes_length[find_fittest()])
-print(population)
-print(routes_length)
-
-#for j in range(n_generations):
-
+    print("Best route for generation: ", population[find_fittest()], "\n" "Route length: ",
+          routes_length[find_fittest()])
+    del taken[0:population_size]
+    print(population)
+    print(routes_length)
 
 
 
